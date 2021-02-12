@@ -98,7 +98,7 @@ extender.install = async function(projectName, isReinstall) {
     // add project info to the config
     let project = {
         arg: projectName,
-        root: extRoot,
+        root: path.relative(path.join(__dirname, '..'), extRoot),
         name: name
     };
     let pkgJsonPath = path.join(project.root, 'package.json');
@@ -235,6 +235,9 @@ extender.install[libraryType] = (config, project/*, isReinstall*/) => {
                 const initCodePath = path.join(project.root, config.initCode);
                 config.initCode = fs.readFileSync(initCodePath, 'utf8');
             }
+            config.models = config.models || [];
+            config.models
+                .forEach(model => model.path = path.join(project.root, model.path));
             return updateTemplateFile(LIBRARY_TEMPLATE_PATH, libraryType);
         });
 };

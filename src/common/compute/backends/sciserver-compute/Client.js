@@ -7,7 +7,6 @@ define([
     'module',
     'path',
     'node-fetch',
-    'deepforge/sciserver-auth',
     'text!./files/prepare-and-run.sh',
 ], function(
     ComputeClient,
@@ -17,7 +16,6 @@ define([
     module,
     path,
     fetch,
-    login,
     PREPARE_AND_RUN,
 ) {
     const Headers = fetch.Headers;
@@ -26,7 +24,8 @@ define([
         constructor(logger, blobClient, config) {
             super(logger, blobClient, config);
             this.username = config.username;
-            this.password = config.password;
+            this.token = config.token;
+            assert(this.token, 'Token not provided. Perhaps configuration skipped prepare step?');
             this.computeDomain = config.computeDomain;
             this.previousJobState = {};
             this.consoleOutputLen = {};
@@ -66,7 +65,7 @@ define([
             const metadata = await this.blobClient.getMetadata(hash);
             const config =  {
                 username: this.username,
-                password: this.password,
+                token: this.token,
                 volume: `${this.username}/scratch`,
                 volumePool: 'Temporary'
             };
@@ -110,14 +109,9 @@ define([
         }
 
         async fetch (url, opts={}) {
-            const token = await this.token();
             opts.headers = opts.headers || new Headers();
-            opts.headers.append('X-Auth-Token', token);
+            opts.headers.append('X-Auth-Token', this.token);
             return fetch(url, opts);
-        }
-
-        async token () {
-            return login(this.username, this.password);
         }
 
         async getJobState (jobInfo) {
@@ -126,7 +120,7 @@ define([
             const opts = {
                 headers: new Headers(),
             };
-            opts.headers.append('X-Auth-Token', await this.token());
+            opts.headers.append('X-Auth-Token', this.token);
 
             const response = await fetch(url, opts);
             const {status} = response;
@@ -234,11 +228,15 @@ define([
         _getStorageConfigAndDataInfo (filepath) {
             const dirs = filepath.split('/').slice(4);
             let [volumePool, owner, volume] = dirs.slice(0, 3);
-            const password = this.password;
             volume = owner + '/' + volume;
             const filename = dirs.slice(3).join('/');
             return {
-                config: {username: this.username, volumePool, password, volume},
+                config: {
+                    username: this.username,
+                    token: this.token,
+                    volumePool,
+                    volume
+                },
                 dataInfo: {
                     data: {filename, volume, volumePool}
                 }

@@ -1,17 +1,16 @@
-/*globals define*/
+/*global define*/
 define([
     'deepforge/sciserver-auth',
 ], function(
     fetchToken,
 ) {
-    return {
-        name: 'SciServer Compute',
-        dashboard: './dashboard/index',
+    const metadata = {
+        name: 'SciServer Files Service',
         configStructure: [
             {
                 name: 'username',
                 displayName: 'Username',
-                description: 'SciServer username',
+                description: 'SciServer account to use',
                 value: '',
                 valueType: 'stringX',
                 valueItemsURL: '/routers/SciServerAuth',
@@ -26,13 +25,21 @@ define([
                 isAuth: true
             },
             {
-                name: 'computeDomain',
-                displayName: 'Compute Domain',
-                description: 'A small job shares resources with up to 4 other jobs and has a max quota for RAM of approx 32GB. A large job runs exclusively and has all CPU cores and RAM available (approx 240GB), however since only one large job will run at a time, there may be a longer wait for the job to start.',
-                value: 'Small Jobs Domain',
+                name: 'volume',
+                displayName: 'Volume',
+                description: 'Volume to use for upload.',
+                value: 'USERNAME/deepforge_data',
+                valueType: 'string',
+                readOnly: false
+            },
+            {
+                name: 'volumePool',
+                displayName: 'Volume Pool',
+                description: 'Folders and files in User Volumes under “Storage” will be backed up and permanent, but there is a quota limit of 10GB. Folders and files in User Volumes under “Temporary” are not backed up, and will be deleted after a particular time period.',
+                value: 'Storage',
                 valueItems: [
-                    'Small Jobs Domain',
-                    'Large Jobs Domain'
+                    'Storage',
+                    'Temporary'
                 ]
             }
         ],
@@ -42,4 +49,6 @@ define([
             return config;
         }
     };
+
+    return metadata;
 });

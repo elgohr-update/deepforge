@@ -7,7 +7,7 @@ define([
     'css!./styles/OperationCodeEditorWidget.css'
 ], function (
     TextEditorWidget,
-    _
+    _,
 ) {
     'use strict';
 
@@ -20,11 +20,15 @@ define([
         // Add the shift-enter command
         this.editor.addCommand(
             monaco.KeyMod.Shift | monaco.KeyCode.Enter,
-            this.executeOrStopJob
+            this.handleOperationExecute.bind(this)
         );
         this.editor.updateOptions({
             lineNumbers: this.updateOffset.bind(this)
         });
+    };
+
+    OperationCodeEditorWidget.prototype.handleOperationExecute = function () {
+        return this.executeOrStopJob(...arguments);
     };
 
     _.extend(OperationCodeEditorWidget.prototype, TextEditorWidget.prototype);

@@ -30,7 +30,7 @@ jobs:
         if: github.event_name == 'push'
 
       - name: Publish to docker hub (server)
-        uses: elgohr/Publish-Docker-Github-Action@master
+        uses: elgohr/Publish-Docker-Github-Action@v5
         with:
           name: deepforge/server
           username: ${{ secrets.DOCKER_USERNAME }}
@@ -39,7 +39,7 @@ jobs:
           dockerfile: docker/Dockerfile
 
       - name: Publish to docker hub (kitchen-sink)
-        uses: elgohr/Publish-Docker-Github-Action@master
+        uses: elgohr/Publish-Docker-Github-Action@v5
 
         with:
           name: deepforge/kitchen-sink
